@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log"
-	"os"
 
 	flatbuffers "github.com/google/flatbuffers/go"
 	"github.com/ivagulin/grpc-flatbuffers-example/bookmarks"
@@ -13,15 +13,13 @@ import (
 
 type server struct{}
 
-var addr = "0.0.0.0:50051"
+var addr = flag.String("addr", "0.0.0.0:50051", "gRPC server address")
+var cmd = flag.String("cmd", "last-added", "cmd")
 
 func main() {
+	flag.Parse()
 
-	if len(os.Args) < 2 {
-		log.Fatalln("Insufficient args provided")
-	}
-
-	conn, err := grpc.Dial(addr, grpc.WithInsecure(), grpc.WithCodec(flatbuffers.FlatbuffersCodec{}))
+	conn, err := grpc.Dial(*addr, grpc.WithInsecure(), grpc.WithCodec(flatbuffers.FlatbuffersCodec{}))
 	if err != nil {
 		log.Fatalf("Failed to connect: %v", err)
 	}
@@ -29,17 +27,15 @@ func main() {
 
 	client := bookmarks.NewBookmarksServiceClient(conn)
 
-	cmd := os.Args[1]
+	if *cmd == "add" {
 
-	if cmd == "add" {
-
-		if len(os.Args) < 4 {
+		if flag.NArg() < 2 {
 			log.Fatalln("Insufficient args provided for add command..")
 		}
 
 		b := flatbuffers.NewBuilder(0)
-		url := b.CreateString(os.Args[2])
-		title := b.CreateString(os.Args[3])
+		url := b.CreateString(flag.Arg(0))
+		title := b.CreateString(flag.Arg(1))
 
 		bookmarks.AddRequestStart(b)
 		bookmarks.AddRequestAddUrl(b, url)
@@ -51,7 +47,7 @@ func main() {
 			log.Fatalf("Retrieve client failed: %v", err)
 		}
 
-	} else if cmd == "last-added" {
+	} else if *cmd == "last-added" {
 
 		b := flatbuffers.NewBuilder(0)
 		bookmarks.LastAddedRequestStart(b)

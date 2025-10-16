@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"strconv"
@@ -61,6 +62,7 @@ func main() {
 	ser := grpc.NewServer(grpc.CustomCodec(flatbuffers.FlatbuffersCodec{}))
 
 	bookmarks.RegisterBookmarksServiceServer(ser, &server{})
+	fmt.Printf("Bookmarks server listening on %s\n", addr)
 	if err := ser.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
