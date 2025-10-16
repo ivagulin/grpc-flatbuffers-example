@@ -4,103 +4,129 @@
 
 package bookmarks
 
-import "github.com/google/flatbuffers/go"
-
 import (
-  context "golang.org/x/net/context"
-  grpc "google.golang.org/grpc"
+	context "context"
+	flatbuffers "github.com/google/flatbuffers/go"
+	grpc "google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // Client API for BookmarksService service
-type BookmarksServiceClient interface{
-  Add(ctx context.Context, in *flatbuffers.Builder, 
-  	opts... grpc.CallOption) (* AddResponse, error)  
-  LastAdded(ctx context.Context, in *flatbuffers.Builder, 
-  	opts... grpc.CallOption) (* LastAddedResponse, error)  
+type BookmarksServiceClient interface {
+	Add(ctx context.Context, in *flatbuffers.Builder,
+		opts ...grpc.CallOption) (*AddResponse, error)
+	LastAdded(ctx context.Context, in *flatbuffers.Builder,
+		opts ...grpc.CallOption) (*LastAddedResponse, error)
 }
 
 type bookmarksServiceClient struct {
-  cc *grpc.ClientConn
+	cc grpc.ClientConnInterface
 }
 
-func NewBookmarksServiceClient(cc *grpc.ClientConn) BookmarksServiceClient {
-  return &bookmarksServiceClient{cc}
+func NewBookmarksServiceClient(cc grpc.ClientConnInterface) BookmarksServiceClient {
+	return &bookmarksServiceClient{cc}
 }
 
-func (c *bookmarksServiceClient) Add(ctx context.Context, in *flatbuffers.Builder, 
-	opts... grpc.CallOption) (* AddResponse, error) {
-  out := new(AddResponse)
-  err := grpc.Invoke(ctx, "/bookmarks.BookmarksService/Add", in, out, c.cc, opts...)
-  if err != nil { return nil, err }
-  return out, nil
+func (c *bookmarksServiceClient) Add(ctx context.Context, in *flatbuffers.Builder,
+	opts ...grpc.CallOption) (*AddResponse, error) {
+	out := new(AddResponse)
+	err := c.cc.Invoke(ctx, "/bookmarks.BookmarksService/Add", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
-func (c *bookmarksServiceClient) LastAdded(ctx context.Context, in *flatbuffers.Builder, 
-	opts... grpc.CallOption) (* LastAddedResponse, error) {
-  out := new(LastAddedResponse)
-  err := grpc.Invoke(ctx, "/bookmarks.BookmarksService/LastAdded", in, out, c.cc, opts...)
-  if err != nil { return nil, err }
-  return out, nil
+func (c *bookmarksServiceClient) LastAdded(ctx context.Context, in *flatbuffers.Builder,
+	opts ...grpc.CallOption) (*LastAddedResponse, error) {
+	out := new(LastAddedResponse)
+	err := c.cc.Invoke(ctx, "/bookmarks.BookmarksService/LastAdded", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 // Server API for BookmarksService service
 type BookmarksServiceServer interface {
-  Add(context.Context, *AddRequest) (*flatbuffers.Builder, error)  
-  LastAdded(context.Context, *LastAddedRequest) (*flatbuffers.Builder, error)  
+	Add(context.Context, *AddRequest) (*flatbuffers.Builder, error)
+	LastAdded(context.Context, *LastAddedRequest) (*flatbuffers.Builder, error)
+	mustEmbedUnimplementedBookmarksServiceServer()
 }
 
-func RegisterBookmarksServiceServer(s *grpc.Server, srv BookmarksServiceServer) {
-  s.RegisterService(&_BookmarksService_serviceDesc, srv)
+type UnimplementedBookmarksServiceServer struct {
+}
+
+func (UnimplementedBookmarksServiceServer) Add(context.Context, *AddRequest) (*flatbuffers.Builder, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Add not implemented")
+}
+
+func (UnimplementedBookmarksServiceServer) LastAdded(context.Context, *LastAddedRequest) (*flatbuffers.Builder, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LastAdded not implemented")
+}
+
+func (UnimplementedBookmarksServiceServer) mustEmbedUnimplementedBookmarksServiceServer() {}
+
+type UnsafeBookmarksServiceServer interface {
+	mustEmbedUnimplementedBookmarksServiceServer()
+}
+
+func RegisterBookmarksServiceServer(s grpc.ServiceRegistrar, srv BookmarksServiceServer) {
+	s.RegisterService(&_BookmarksService_serviceDesc, srv)
 }
 
 func _BookmarksService_Add_Handler(srv interface{}, ctx context.Context,
 	dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-  in := new(AddRequest)
-  if err := dec(in); err != nil { return nil, err }
-  if interceptor == nil { return srv.(BookmarksServiceServer).Add(ctx, in) }
-  info := &grpc.UnaryServerInfo{
-    Server: srv,
-    FullMethod: "/bookmarks.BookmarksService/Add",
-  }
-  
-  handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-    return srv.(BookmarksServiceServer).Add(ctx, req.(* AddRequest))
-  }
-  return interceptor(ctx, in, info, handler)
+	in := new(AddRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BookmarksServiceServer).Add(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/bookmarks.BookmarksService/Add",
+	}
+
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BookmarksServiceServer).Add(ctx, req.(*AddRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
-
-
 func _BookmarksService_LastAdded_Handler(srv interface{}, ctx context.Context,
 	dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-  in := new(LastAddedRequest)
-  if err := dec(in); err != nil { return nil, err }
-  if interceptor == nil { return srv.(BookmarksServiceServer).LastAdded(ctx, in) }
-  info := &grpc.UnaryServerInfo{
-    Server: srv,
-    FullMethod: "/bookmarks.BookmarksService/LastAdded",
-  }
-  
-  handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-    return srv.(BookmarksServiceServer).LastAdded(ctx, req.(* LastAddedRequest))
-  }
-  return interceptor(ctx, in, info, handler)
+	in := new(LastAddedRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BookmarksServiceServer).LastAdded(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/bookmarks.BookmarksService/LastAdded",
+	}
+
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BookmarksServiceServer).LastAdded(ctx, req.(*LastAddedRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
-
-
 var _BookmarksService_serviceDesc = grpc.ServiceDesc{
-  ServiceName: "bookmarks.BookmarksService",
-  HandlerType: (*BookmarksServiceServer)(nil),
-  Methods: []grpc.MethodDesc{
-    {
-      MethodName: "Add",
-      Handler: _BookmarksService_Add_Handler, 
-    },
-    {
-      MethodName: "LastAdded",
-      Handler: _BookmarksService_LastAdded_Handler, 
-    },
-  },
-  Streams: []grpc.StreamDesc{
-  },
+	ServiceName: "bookmarks.BookmarksService",
+	HandlerType: (*BookmarksServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Add",
+			Handler:    _BookmarksService_Add_Handler,
+		},
+		{
+			MethodName: "LastAdded",
+			Handler:    _BookmarksService_LastAdded_Handler,
+		},
+	},
+	Streams: []grpc.StreamDesc{
+	},
 }
-

@@ -8,12 +8,13 @@ import (
 	context "golang.org/x/net/context"
 
 	flatbuffers "github.com/google/flatbuffers/go"
-	"github.com/jonog/fbs-example/bookmarks"
+	"github.com/ivagulin/grpc-flatbuffers-example/bookmarks"
 
 	"google.golang.org/grpc"
 )
 
 type server struct {
+	bookmarks.UnimplementedBookmarksServiceServer
 	id        int
 	lastTitle string
 	lastURL   string
@@ -26,7 +27,7 @@ func (s *server) Add(context context.Context, in *bookmarks.AddRequest) (*flatbu
 
 	s.id++
 	s.lastTitle = string(in.Title())
-	s.lastURL = string(in.URL())
+	s.lastURL = string(in.Url())
 
 	b := flatbuffers.NewBuilder(0)
 	bookmarks.AddResponseStart(b)
@@ -43,9 +44,9 @@ func (s *server) LastAdded(context context.Context, in *bookmarks.LastAddedReque
 	url := b.CreateString(s.lastURL)
 
 	bookmarks.LastAddedResponseStart(b)
-	bookmarks.LastAddedResponseAddID(b, id)
+	bookmarks.LastAddedResponseAddId(b, id)
 	bookmarks.LastAddedResponseAddTitle(b, title)
-	bookmarks.LastAddedResponseAddURL(b, url)
+	bookmarks.LastAddedResponseAddUrl(b, url)
 	b.Finish(bookmarks.LastAddedResponseEnd(b))
 	return b, nil
 }

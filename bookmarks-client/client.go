@@ -6,7 +6,7 @@ import (
 	"os"
 
 	flatbuffers "github.com/google/flatbuffers/go"
-	"github.com/jonog/fbs-example/bookmarks"
+	"github.com/ivagulin/grpc-flatbuffers-example/bookmarks"
 
 	"google.golang.org/grpc"
 )
@@ -42,7 +42,7 @@ func main() {
 		title := b.CreateString(os.Args[3])
 
 		bookmarks.AddRequestStart(b)
-		bookmarks.AddRequestAddURL(b, url)
+		bookmarks.AddRequestAddUrl(b, url)
 		bookmarks.AddRequestAddTitle(b, title)
 		b.Finish(bookmarks.AddRequestEnd(b))
 
@@ -62,8 +62,8 @@ func main() {
 			log.Fatalf("Retrieve client failed: %v", err)
 		}
 
-		log.Println("ID: ", string(out.ID()))
-		log.Println("URL: ", string(out.URL()))
+		log.Println("ID: ", string(out.Id()))
+		log.Println("URL: ", string(out.Url()))
 		log.Println("Title: ", string(out.Title()))
 
 	}
