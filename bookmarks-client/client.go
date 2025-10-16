@@ -13,13 +13,14 @@ import (
 
 type server struct{}
 
-var addr = flag.String("addr", "0.0.0.0:50051", "gRPC server address")
+var flatAddr = flag.String("flatAddr", "0.0.0.0:50051", "gRPC server address")
+var grpcAddr = flag.String("grpcAddr", "0.0.0.0:50052", "gRPC server address")
 var cmd = flag.String("cmd", "last-added", "cmd")
 
 func main() {
 	flag.Parse()
 
-	conn, err := grpc.Dial(*addr, grpc.WithInsecure(), grpc.WithCodec(flatbuffers.FlatbuffersCodec{}))
+	conn, err := grpc.Dial(*flatAddr, grpc.WithInsecure(), grpc.WithCodec(flatbuffers.FlatbuffersCodec{}))
 	if err != nil {
 		log.Fatalf("Failed to connect: %v", err)
 	}
@@ -44,7 +45,7 @@ func main() {
 
 		_, err = client.Add(context.Background(), b)
 		if err != nil {
-			log.Fatalf("Retrieve client failed: %v", err)
+			log.Fatalf("Retrieve flatClient failed: %v", err)
 		}
 
 	} else if *cmd == "last-added" {
@@ -55,7 +56,7 @@ func main() {
 
 		out, err := client.LastAdded(context.Background(), b)
 		if err != nil {
-			log.Fatalf("Retrieve client failed: %v", err)
+			log.Fatalf("Retrieve flatClient failed: %v", err)
 		}
 
 		log.Println("ID: ", string(out.Id()))
